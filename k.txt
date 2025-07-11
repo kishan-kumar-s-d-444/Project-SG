@@ -1,0 +1,24 @@
+1)
+IN cmd
+geth --dev --http --http.addr "0.0.0.0" --http.port 8545 --http.corsdomain "*" --http.api "eth,net,web3,admin,debug" --dev.period 0
+
+2)
+.\venv\Scripts\Activate.ps1 
+python .\register_file_hash.py
+python .\deploy_contract.py
+
+3)
+PS C:\Users\kshnk\EL\devved 7> .\venv\Scripts\Activate.ps1  
+cd authserver
+python run.py
+
+4)
+PS C:\Users\kshnk\EL\devved 7> .\venv\Scripts\Activate.ps1 
+python  .\resource_server.py
+
+5)
+PS C:\Users\kshnk\EL\devved 7> .\venv\Scripts\Activate.ps1 
+ python .\combined_client.py 1
+
+6)
+(venv) PS C:\Users\kshnk\EL\devved 7> streamlit run oauth_gui_streamlit.py

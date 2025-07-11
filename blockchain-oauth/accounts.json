@@ -1,0 +1,10 @@
+{
+  "client": {
+    "address": "0x19D8808154BB7f961cE913E853965D26Bd6e8c68",
+    "private_key": "2944e62beba9ec2fdb85db682af1f6b5ee17509e026419c9502d5f9071a215ac"
+  },
+  "resource_server": {
+    "address": "0xf2C65E12C365EA46f2608e7E0728e56676837e3f",
+    "private_key": "f1b945dfd85212a7743b0ecbc775717a74b5459471d386f986450fd464c77df5"
+  }
+}

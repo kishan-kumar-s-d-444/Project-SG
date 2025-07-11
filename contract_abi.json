@@ -1,0 +1,45 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "client",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "endpoint",
+                "type": "string"
+            }
+        ],
+        "name": "checkAccess",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "clientId",
+                "type": "string"
+            }
+        ],
+        "name": "getClientAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

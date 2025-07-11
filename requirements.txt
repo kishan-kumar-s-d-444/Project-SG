@@ -1,0 +1,12 @@
+
+Flask
+Werkzeug
+Flask-SQLAlchemy
+SQLAlchemy
+PyJWT
+python-dotenv
+web3
+eth-account
+requests
+pytest
+

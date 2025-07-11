@@ -1,0 +1,5 @@
+"C:\Program Files\Geth\geth.exe" --datadir ./chaindata --networkid 15 --http --http.addr "0.0.0.0" --http.port 8545 --http.corsdomain "*" --http.api "eth,net,web3,admin,debug" --nodiscover --dev --dev.period 0 console
+
+"C:\Program Files\Geth\geth.exe" --dev --http --http.addr "0.0.0.0" --http.port 8545 --http.corsdomain "*" --http.api "eth,net,web3,admin,debug" --dev.period 0
+
+ALWAYS RUN REGISTER_FILE_HASH.PY to register the file hashes on the blockchain for validation.

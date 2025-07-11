@@ -1,0 +1,11 @@
+eth.newAccount()
+eth
+eth.getBalance(eth.accounts[0])
+eth.accounts[0]
+eth.blockNumber
+eth.accounts
+var clientAccount = eth.accounts.create()
+eth.accounts
+eth
+eth.getBalance(eth.accounts[0])
+miner.start()

@@ -1,0 +1,98 @@
+{
+    "client1": {
+        "address": "0x3C0A96E68151B1610ACC97648C2391D870FBCAC3",
+        "private_key": "1846aa6558213fb4b5017322f53ba874e46aacf91cae58ae818710753ebac27b"
+    },
+    "client2": {
+        "address": "0x2305c89E82aAfE333B95EaBD026EbBAEaBd0edBF",
+        "private_key": "50a683f649a28fe665a1c750b579951504633d31683fbf9c47af69cc521fdb7b"
+    },
+    "client3": {
+        "address": "0x9B591e3ec8c070B8e9cd4f5A0Af52172AF34Ba6A",
+        "private_key": "438f1420b93cccc6d50727d6f429f65091f1251d868491a680f96c6d9a79713e"
+    },
+    "client4": {
+        "address": "0x0FE547578a5f185f63E2b8d594Ab6e3b71781434",
+        "private_key": "8155aa52910b4419f2d08bb24df6b739a29231bfbe5114b2e0ed0e2bc89913a9"
+    },
+    "tesla_models_1": {
+        "address": "0x2f824A6816ceF018e1B443f29F05B99A8fc45377",
+        "private_key": "1e84ba7372cd45e0f7c504cd907adabf900def8dee5aba61ff65b2ba3b369c58"
+    },
+    "tesla_models_2": {
+        "address": "0xC05e039B0E0918c57595cF2C7E711c80D5162573",
+        "private_key": "77a4f6dbf340a5a5fba37024cc91d31a3b5eeb6d4c316c03f4ef52b6d3607d73"
+    },
+    "tesla_models_3": {
+        "address": "0x2b8C2C739cf7dD24e9065627d63bDEC5fEB2bDDF",
+        "private_key": "53ce040e6ac39c711aa8ccd86212940c2bbeb69df017508b2ff8ebaa79195679"
+    },
+    "tesla_models_4": {
+        "address": "0x72652378bEA79a934f53a7a1771985f958F6A970",
+        "private_key": "03ec1339aa2b2b20397cd28cc0000fb02e7a96d8e70b29945f8ff68d071b70b1"
+    },
+    "tesla_models_5": {
+        "address": "0xcD821742d595A6bD0d0C3146661a7616f8f1Bf7a",
+        "private_key": "7c90d7fc3ab5da273741d9f04e3b6c64492b9e87fd2430bda36ab506d1ba9347"
+    },
+    "tesla_model3_6": {
+        "address": "0xa4F1D62c02ae1629c431b4aF5fF82A3838850f8E",
+        "private_key": "74cf8bbee05d147b570339de1116834dd2ba21418670526e61087bc34497c56f"
+    },
+    "tesla_model3_7": {
+        "address": "0x680d4Ed07530bfFbDC7CaAa65deb42c2e7EAC866",
+        "private_key": "b40a038d31c96477d64da1481a8406d44f22a352a4d7b91db7c2fc71a50bf9e2"
+    },
+    "tesla_model3_8": {
+        "address": "0xCd9b920612c6eA4d12bc691d08ff008Bc440b29E",
+        "private_key": "a7fbe6a6de11e2999906adc981c0af1611172fdec70e539d26aed5a6a1a61507"
+    },
+    "tesla_model3_9": {
+        "address": "0x17D48b7e877517be0b00f372550D6131F9Caa2Cc",
+        "private_key": "6d6de5a5b5428e0359d8f36490e146a7c382889d0d25664329769a9afcc041dd"
+    },
+    "tesla_model3_10": {
+        "address": "0x5D0552D63Eb91D05c231f63Af05902B856E6Bd25",
+        "private_key": "3589851465c8b171aff428de7858f6518e8fddd4b2906a6473a04c90b015ff8e"
+    },
+    "tesla_modelx_11": {
+        "address": "0x3A12228204629c040b05B4819Aa993aa67bEA68c",
+        "private_key": "df35dab7ec1ef014857ffd9581326e637acbc8a5078005e84f0f6aa3e6a2c700"
+    },
+    "tesla_modelx_12": {
+        "address": "0xF9c8f6D9Cb8984f25C034538d9F5Ea09E8fe4888",
+        "private_key": "77ff912984d609311b783db259bd8786fbcd0046928c3d24eb3fad0539abbb2a"
+    },
+    "tesla_modelx_13": {
+        "address": "0x99aDDF8d5D66794D3aB5c7b02BB1CF8c9cab656F",
+        "private_key": "cf671f0bfd4f89da6c4e41fce12edff346aff34514f60de8b46597c2db799c76"
+    },
+    "tesla_modelx_14": {
+        "address": "0x83925e7553961383E31d0654790045df6FACBB45",
+        "private_key": "aef060d826ac844f309197ecba94e7832a05ad1a9709834ece9eeda0d8f35672"
+    },
+    "tesla_modelx_15": {
+        "address": "0x46221df7d5B7B41518747498DC2A7B99989277bB",
+        "private_key": "504028cc763c0469f4ecb35012d42ec2fc5dfa204ce81a5843391076948ae8ad"
+    },
+    "tesla_modely_16": {
+        "address": "0xdd6A70E44Fc452Fae05A9Bd5082622424283D9d7",
+        "private_key": "31ade07f06501c99b666a3ae8d76399bc30619bec92070029e45e7cda7906e54"
+    },
+    "tesla_modely_17": {
+        "address": "0x7Ff04cd2321b0fd21d593fCd184CeB801c9f24E5",
+        "private_key": "c286c529d9d61ba86b3de742e584c958adb4d7997b682b51075541735928d0b7"
+    },
+    "tesla_modely_18": {
+        "address": "0x37295E882b8A7701f48D62d6b1d0D9E70ef13a1E",
+        "private_key": "23aad1b0928ea9db422972c8fba707fa8f4c7c5617439a4a10576972a40372cb"
+    },
+    "tesla_modely_19": {
+        "address": "0xE7b49f74d1568064c2c819B7e601ad4c850C78Fb",
+        "private_key": "301e5ad1d99ff233df2ec13d08c3a9dc0826da26480389febfbf355a84abe6cd"
+    },
+    "tesla_modely_20": {
+        "address": "0x65A004b146f86A4Cd44A6B2A8Ec856a26Ed1C183",
+        "private_key": "fbf4abb291b97967ed04c4d5a0809d69a8cc9799b06696ba42489295aa5adb85"
+    }
+}
