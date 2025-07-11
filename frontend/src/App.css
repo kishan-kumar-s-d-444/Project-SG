@@ -1,0 +1,82 @@
+
+body {
+  background: #f4f6fa;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.header {
+  padding: 20px;
+  background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+  color: white;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.step-container {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin: 10px 0;
+  background: white;
+}
+
+.success-box {
+  padding: 15px;
+  background-color: #e8f5e9;
+  border-left: 5px solid #2e7d32;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.error-box {
+  padding: 15px;
+  background-color: #ffebee;
+  border-left: 5px solid #c62828;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.info-box {
+  padding: 15px;
+  background-color: #e3f2fd;
+  border-left: 5px solid #1976d2;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.nonce-box {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border: 2px solid #1976d2;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-family: monospace;
+  font-size: 1.2em;
+}
+
+.signature-box {
+  padding: 20px;
+  background-color: #e3f2fd;
+  border: 2px solid #1976d2;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-family: monospace;
+  word-wrap: break-word;
+}
+
+.f1-car {
+  font-size: 80px;
+  animation: drive 3s linear;
+  white-space: nowrap;
+  position: relative;
+}
+
+.blue-success-box {
+  padding: 15px;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 5px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+}
