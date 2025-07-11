@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Step1ClientConfig from './components/Step1ClientConfig';
 import Step1_5AuthCode from './components/Step1_5AuthCode';
 import Step2TokenExchange from './components/Step2TokenExchange';
@@ -9,83 +9,195 @@ import Step2_8SignNonce from './components/Step2_8SignNonce';
 import Step3ResourceAccess from './components/Step3ResourceAccess';
 import Step4Complete from './components/Step4Complete';
 import './App.css';
+import { Wallet, solidityKeccak256, arrayify } from 'ethers';
 
 function App() {
-  // State for each step
+  // Centralized state for all steps
   const [step, setStep] = useState(1);
   const [config, setConfig] = useState({});
-  const [generatedAuthCode, setGeneratedAuthCode] = useState('123456'); // Placeholder
+  const [client, setClient] = useState(null); // Not used directly, but for parity
+  const [generatedAuthCode, setGeneratedAuthCode] = useState('');
+  const [inputAuthCode, setInputAuthCode] = useState('');
   const [authCode, setAuthCode] = useState('');
   const [token, setToken] = useState('');
-  const [tokenValidation, setTokenValidation] = useState(null); // true/false/null
+  const [tokenValidation, setTokenValidation] = useState(null);
   const [nonce, setNonce] = useState(null);
-  const [clientAddress, setClientAddress] = useState('0x123...'); // Placeholder
-  const [clientPrivateKey, setClientPrivateKey] = useState('abcdef1234567890'); // Placeholder
   const [signature, setSignature] = useState(null);
   const [signedMessage, setSignedMessage] = useState(null);
-  const [signatureVerification, setSignatureVerification] = useState(null); // true/false/null
+  const [signatureVerification, setSignatureVerification] = useState(null);
   const [telemetryData, setTelemetryData] = useState(null);
   const [fileDownloadResult, setFileDownloadResult] = useState(null);
   const [lastData, setLastData] = useState(null);
   const [error, setError] = useState('');
+  const [clientAddress, setClientAddress] = useState('');
+  const [clientPrivateKey, setClientPrivateKey] = useState('');
+  const [mode, setMode] = useState('1');
+  const [scopes, setScopes] = useState(['engine_start', 'door_unlock']);
 
-  // Step navigation handlers
-  const nextStep = () => setStep(s => s + 0.5);
-  const prevStep = () => setStep(s => s - 0.5);
-  const goToStep = (n) => setStep(n);
+  // Sync private key from config
+  useEffect(() => {
+    if (config.privateKey) setClientPrivateKey(config.privateKey);
+  }, [config.privateKey]);
 
-  // Placeholder API handlers (replace with real API calls)
-  const handleInitAuth = () => {
-    setGeneratedAuthCode('123456'); // Replace with backend call
-    nextStep();
+  // Step 1: Client Config
+  const handleInitAuth = async () => {
+    setError('');
+    try {
+      const scopeString = config.mode === '1' ? (config.scopes || []).join(' ') : 'file_download';
+      // Save mode and scopes for later
+      setMode(config.mode);
+      setScopes(config.scopes || ['engine_start', 'door_unlock']);
+      // Request auth code
+      const res = await fetch(`${config.authServer}/authorize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: config.clientId,
+          client_secret: config.clientSecret,
+          scope: scopeString
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setGeneratedAuthCode(data.code);
+      setStep(1.5);
+    } catch (err) {
+      setError('Failed to get authorization code: ' + err.message);
+    }
   };
+
+  // Step 1.5: Validate Auth Code
   const handleValidateAuthCode = (code) => {
-    setAuthCode(code);
-    nextStep();
+    if (code === generatedAuthCode) {
+      setAuthCode(code);
+      setStep(2);
+      setError('');
+    } else {
+      setError('❌ Invalid authorization code!');
+    }
   };
-  const handleGenerateToken = () => {
-    setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'); // Replace with backend call
-    nextStep();
+
+  // Step 2: Token Exchange
+  const handleGenerateToken = async () => {
+    setError('');
+    try {
+      const res = await fetch(`${config.authServer}/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code: authCode,
+          client_id: config.clientId,
+          client_secret: config.clientSecret,
+          grant_type: 'authorization_code'
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setToken(data.access_token);
+      setStep(2.5);
+    } catch (err) {
+      setError('Failed to get token: ' + err.message);
+    }
   };
-  const handleValidateToken = () => {
-    setTokenValidation(true); // Replace with backend call
+
+  // Step 2.5: Token Validation (JWT check, simplified)
+  const handleValidateToken = async () => {
+    setError('');
+    try {
+      // For demo, just check if token is non-empty
+      if (token && token.length > 0) {
+        setTokenValidation(true);
+      } else {
+        setTokenValidation(false);
+      }
+    } catch (err) {
+      setTokenValidation(false);
+      setError('Token validation failed: ' + err.message);
+    }
   };
-  const handleProceedNonce = () => nextStep();
-  const handleRequestNonce = () => {
-    setNonce(42); // Replace with backend call
-    setClientAddress('0x123...');
-    setClientPrivateKey('abcdef1234567890');
+
+  // Step 2.75: Request Nonce
+  const handleRequestNonce = async () => {
+    setError('');
+    try {
+      // For demo, just use a random nonce or fetch from server
+      const res = await fetch(`${config.resourceServer}/get-nonce`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setNonce(data.nonce);
+      setClientAddress(data.address || '');
+    } catch (err) {
+      setError('Failed to fetch nonce from server: ' + err.message);
+    }
   };
-  const handleRequestNewNonce = () => setNonce(Math.floor(Math.random() * 1000));
-  const handleSignNonce = () => {
-    setSignature('0xdeadbeef');
-    setSignedMessage(`Nonce: ${nonce}`);
-    setSignatureVerification(true);
+
+  // Step 2.8: Sign Nonce
+  const handleSignNonce = async () => {
+    setError('');
+    try {
+      if (!nonce || !clientPrivateKey) throw new Error('Missing nonce or private key');
+      const wallet = new Wallet(clientPrivateKey);
+      const message = `Nonce: ${nonce}`;
+      const messageBytes = new TextEncoder().encode(message);
+      const signedMessage = await wallet.signMessage(messageBytes);
+      setSignature(signedMessage);
+      setSignedMessage(message);
+      // Verify signature
+      const recovered = Wallet.verifyMessage(messageBytes, signedMessage);
+      if (recovered.toLowerCase() === wallet.address.toLowerCase()) {
+        setSignatureVerification(true);
+      } else {
+        setSignatureVerification(false);
+      }
+    } catch (err) {
+      setError('Failed to sign nonce: ' + err.message);
+      setSignatureVerification(false);
+    }
   };
-  const handleSignAgain = () => {
-    setSignature(null);
-    setSignedMessage(null);
-    setSignatureVerification(null);
+
+  // Step 3: Resource Access (Telemetry or File)
+  const handleRequestTelemetry = async () => {
+    setError('');
+    try {
+      if (!nonce || !signature) throw new Error('Missing nonce or signature');
+      const headers = {
+        'X-Nonce': nonce,
+        'X-Signature': signature,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const url = `${config.resourceServer}/mercedes/telemetry/${config.clientId}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setTelemetryData(data);
+      setLastData(data);
+    } catch (err) {
+      setError('Failed to fetch telemetry data: ' + err.message);
+    }
   };
-  const handleVerifySignature = () => setSignatureVerification(true);
-  const handleRequestTelemetry = () => {
-    const data = { speed: 100, battery: 80 };
-    setTelemetryData(data);
-    setLastData(data);
+
+  const handleDownloadFile = async (filename, version) => {
+    setError('');
+    try {
+      // Implement file download logic if needed
+      setFileDownloadResult(`downloads/${config.clientId || 'client'}_${filename}.txt`);
+      setStep(4);
+    } catch (err) {
+      setError('Failed to download file: ' + err.message);
+    }
   };
-  const handleDownloadFile = (filename, version) => {
-    setFileDownloadResult(`downloads/${config.clientId || 'client'}_${filename}.txt`);
-  };
+
+  // Step 4: Restart
   const handleRestart = () => {
     setStep(1);
     setConfig({});
-    setGeneratedAuthCode('123456');
+    setGeneratedAuthCode('');
+    setInputAuthCode('');
     setAuthCode('');
     setToken('');
     setTokenValidation(null);
     setNonce(null);
-    setClientAddress('0x123...');
-    setClientPrivateKey('abcdef1234567890');
     setSignature(null);
     setSignedMessage(null);
     setSignatureVerification(null);
@@ -93,11 +205,16 @@ function App() {
     setFileDownloadResult(null);
     setLastData(null);
     setError('');
-  };
-  const handleViewResults = () => {
-    // No-op for now
+    setClientAddress('');
+    setClientPrivateKey('');
+    setMode('1');
+    setScopes(['engine_start', 'door_unlock']);
   };
 
+  // Step navigation
+  const goToStep = (n) => setStep(n);
+
+  // UI rendering for each step
   return (
     <div className="App">
       <div className="header"><h1>🔐 Secure Car API Access</h1></div>
@@ -137,7 +254,7 @@ function App() {
             nonce={nonce}
             onRequestNonce={handleRequestNonce}
             onProceed={() => goToStep(2.8)}
-            onRequestAgain={handleRequestNewNonce}
+            onRequestAgain={() => setNonce(null)}
             onBack={() => goToStep(2.5)}
             clientAddress={clientAddress}
             clientPrivateKey={clientPrivateKey}
@@ -150,14 +267,18 @@ function App() {
             signedMessage={signedMessage}
             onSignNonce={handleSignNonce}
             onProceed={() => goToStep(3)}
-            onSignAgain={handleSignAgain}
+            onSignAgain={() => {
+              setSignature(null);
+              setSignedMessage(null);
+              setSignatureVerification(null);
+            }}
             onBack={() => goToStep(2.75)}
             verificationResult={signatureVerification}
           />
         )}
         {step === 3 && (
           <Step3ResourceAccess
-            mode={config.mode}
+            mode={mode}
             token={token}
             onRequestTelemetry={handleRequestTelemetry}
             telemetryData={telemetryData}
@@ -170,12 +291,13 @@ function App() {
         {step === 4 && (
           <Step4Complete
             onRestart={handleRestart}
-            onViewResults={handleViewResults}
-            mode={config.mode}
+            onViewResults={() => {}}
+            mode={mode}
             lastData={lastData}
             clientId={config.clientId}
           />
         )}
+        {error && <div className="error-box" style={{ marginTop: 16 }}>{error}</div>}
       </div>
     </div>
   );

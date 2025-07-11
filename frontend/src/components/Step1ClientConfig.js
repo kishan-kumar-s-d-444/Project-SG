@@ -7,10 +7,11 @@ const Step1ClientConfig = ({ onNext, setConfig, config }) => {
   const [resourceServer, setResourceServer] = useState(config.resourceServer || 'http://localhost:5002');
   const [mode, setMode] = useState(config.mode || '1');
   const [scopes, setScopes] = useState(config.scopes || ['engine_start', 'door_unlock']);
+  const [privateKey, setPrivateKey] = useState(config.privateKey || '');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setConfig({ clientId, clientSecret, authServer, resourceServer, mode, scopes });
+    setConfig({ clientId, clientSecret, authServer, resourceServer, mode, scopes, privateKey });
     onNext();
   };
 
@@ -33,6 +34,12 @@ const Step1ClientConfig = ({ onNext, setConfig, config }) => {
           <label>Resource Server URL<br/>
             <input value={resourceServer} onChange={e => setResourceServer(e.target.value)} required />
           </label>
+          <label style={{ marginTop: 12 }}>Private Key<br/>
+            <input type="password" value={privateKey} onChange={e => setPrivateKey(e.target.value)} required placeholder="Paste your private key here" />
+          </label>
+          <div className="warning-box" style={{ color: 'red', marginTop: 8, fontSize: 13 }}>
+            ⚠️ Never share your private key. This is for demo/testing only!
+          </div>
         </div>
       </div>
       <div style={{ marginTop: 16 }}>
