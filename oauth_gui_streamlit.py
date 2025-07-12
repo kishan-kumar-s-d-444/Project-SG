@@ -160,6 +160,21 @@ def step_progress(current_step):
     }
     return f"**Step {current_step}**: {steps.get(current_step, '')}"
 
+    # Sidebar raw telemetry upload
+with st.sidebar.expander("📝 Upload Raw Telemetry Text", expanded=False):
+    raw_text = st.text_area("Paste telemetry text", height=150, key="raw_telemetry_text")
+    upload_btn = st.button("Upload Telemetry", key="btn_upload_telemetry")
+    if upload_btn and raw_text:
+        client: CombinedClient = st.session_state.get("client")
+        if client:
+            ok = client.upload_raw_telemetry(raw_text)
+            if ok:
+                st.success("Telemetry uploaded!")
+            else:
+                st.error("Upload failed – check logs")
+        else:
+            st.warning("Authorize first to acquire token.")
+
 def main():
     # Custom header (moved page config out)
     st.markdown('<div class="header"><h1>🔐 Secure Car API Access</h1></div>', unsafe_allow_html=True)

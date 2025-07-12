@@ -16,6 +16,14 @@ class ConnectedCar(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_authorized = db.Column(db.DateTime)
 
+class TelemetryFile(db.Model):
+    """Metadata for uploaded raw telemetry files"""
+    id = db.Column(db.Integer, primary_key=True)
+    car_id = db.Column(db.String(80), nullable=False)
+    filename = db.Column(db.String(120), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class CarAuthCode(db.Model):
     """Temporary authorization codes for vehicles"""
     id = db.Column(db.Integer, primary_key=True)

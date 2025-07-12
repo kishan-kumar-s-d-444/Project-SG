@@ -138,6 +138,32 @@ class CombinedClient:
             print(f"Error getting data: {str(e)}")
             return None
 
+    def upload_raw_telemetry(self, text):
+        """Send raw telemetry text to auth-server telemetry upload endpoint."""
+        if not self.token:
+            print("❌ No access token – authorize first")
+            return False
+
+        url = f"{self.auth_server_url}/telemetry/upload-text"
+        headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            'car_id': self.client_id,
+            'text': text
+        }
+        try:
+            print(f"Uploading raw telemetry to {url} ...")
+            resp = requests.post(url, headers=headers, json=payload)
+            print(f"Status: {resp.status_code} {resp.text}")
+            return resp.status_code == 201
+        except Exception as e:
+            print(f"Telemetry upload error: {str(e)}")
+            return False
+
+    # -------- existing file upload below --------
+
     def upload_file(self, file_path, version='1'):
         """Upload a file to the resource server and register its hash on-chain"""
         try:
