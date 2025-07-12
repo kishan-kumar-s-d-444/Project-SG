@@ -429,6 +429,57 @@ def get_telemetry(endpoint):
         logger.error(f"Error processing request: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/mercedes/upload/<client_id>', methods=['POST'])
+@requires_auth
+def upload_file(client_id):
+    """Upload a file, record its hash on-chain, and store the file locally"""
+    try:
+        # Verify the authenticated client matches the path param
+        auth_client = request.auth_claims.get('client_id')
+        if auth_client != client_id:
+            return jsonify({'error': 'Client ID mismatch'}), 403
+
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in request'}), 400
+
+        file = request.files['file']
+        filename = file.filename or 'uploaded_file'
+        version = request.form.get('version', '1')
+
+        # Save file under client directory
+        client_dir = os.path.join('client_files', client_id)
+        os.makedirs(client_dir, exist_ok=True)
+        file_path = os.path.join(client_dir, filename)
+        file.save(file_path)
+
+        # Calculate hash
+        file_hash = calculate_file_hash(file_path)
+
+        # Store hash on blockchain
+        contract = load_contract()
+        if not contract:
+            return jsonify({'error': 'Contract not loaded'}), 500
+
+        try:
+            client_address = request.headers.get('X-Client-Address')
+            tx_hash = contract.functions.storeFileHash(
+                Web3.to_checksum_address(client_address),
+                filename,
+                Web3.to_bytes(hexstr=file_hash),
+                int(version)
+            ).transact({'from': w3.eth.accounts[0]})
+            w3.eth.wait_for_transaction_receipt(tx_hash)
+        except Exception as e:
+            logger.error(f"Blockchain store failed: {str(e)}")
+            return jsonify({'error': 'Blockchain store failed'}), 500
+
+        return jsonify({'status': 'success', 'file_hash': file_hash, 'tx': tx_hash.hex()}), 200
+
+    except Exception as e:
+        logger.error(f"Upload failed: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 @app.route('/mercedes/files/<client_id>/<filename>', methods=['GET'])
 def get_file(client_id, filename):
     """Serve files with blockchain verification"""

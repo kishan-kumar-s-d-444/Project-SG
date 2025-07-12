@@ -91,7 +91,10 @@ class Config:
         'telemetry_basic',
         'telemetry_advanced',
         'usage_statistics',
-        'efficiency_metrics'
+        'efficiency_metrics',
+
+        'file_upload',
+        'file_download'
     ]
     
     # Security Configuration

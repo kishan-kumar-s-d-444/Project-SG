@@ -7,6 +7,8 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from eth_account.messages import encode_defunct
+import hashlib
+from pathlib import Path
 
 # Must be the first Streamlit command
 st.set_page_config(page_title="OAuth Flow GUI", layout="wide", page_icon="🔐")
@@ -101,6 +103,51 @@ def verify_token(token):
     except jwt.InvalidTokenError as e:
         return False, f"Invalid token: {str(e)}"
 
+# Function to store hash on local Ethereum blockchain
+
+def store_hash_on_chain(file_hash: str):
+    """Store the given SHA-256 hash on the local Ethereum blockchain.
+    A zero-value self-transaction is sent whose data field contains the hash.
+    Returns the resulting transaction hash (hex string) or None if failed."""
+    provider_url = os.getenv("WEB3_PROVIDER_URL", "http://127.0.0.1:8545")
+    w3 = Web3(Web3.HTTPProvider(provider_url))
+
+    if not w3.is_connected():
+        st.error(f"❌ Could not connect to Ethereum node at {provider_url}")
+        return None
+
+    try:
+        sender = w3.eth.accounts[0]
+    except IndexError:
+        st.error("❌ No unlocked accounts available on the local node.")
+        return None
+
+    # Build base transaction without the gas field so we can estimate it
+    tx = {
+        "from": sender,
+        "to": sender,  # self-transaction; data contains file hash
+        "value": 0,
+        "data": w3.to_bytes(hexstr=file_hash),
+        "gasPrice": w3.to_wei("1", "gwei"),
+        "nonce": w3.eth.get_transaction_count(sender),
+    }
+
+    # Estimate gas based on payload size and add a small buffer
+    try:
+        estimated_gas = w3.eth.estimate_gas(tx)
+    except Exception as e:
+        st.error(f"❌ Gas estimation failed: {str(e)}")
+        return None
+    tx["gas"] = int(estimated_gas * 1.1)  # add 10% buffer
+
+    try:
+        tx_hash = w3.eth.send_transaction(tx)
+        w3.eth.wait_for_transaction_receipt(tx_hash)
+        return tx_hash.hex()
+    except Exception as e:
+        st.error(f"❌ Failed to store hash on chain: {str(e)}")
+        return None
+
 def step_progress(current_step):
     steps = {
         1: "🚀 Start",
@@ -116,6 +163,43 @@ def step_progress(current_step):
 def main():
     # Custom header (moved page config out)
     st.markdown('<div class="header"><h1>🔐 Secure Car API Access</h1></div>', unsafe_allow_html=True)
+
+    # Sidebar file upload & blockchain storage
+    with st.sidebar.expander("📤 Upload File & Record Hash", expanded=False):
+        uploaded_file_sb = st.file_uploader("Select a file", key="sidebar_file_upload")
+        if uploaded_file_sb is not None:
+            uploads_dir = Path("uploads")
+            uploads_dir.mkdir(exist_ok=True)
+            temp_path = uploads_dir / uploaded_file_sb.name
+            with open(temp_path, "wb") as f:
+                f.write(uploaded_file_sb.getbuffer())
+            st.success(f"✅ File saved temporarily at {temp_path}")
+
+            # Compute hash
+            file_bytes = uploaded_file_sb.getvalue()
+            file_hash_sb = hashlib.sha256(file_bytes).hexdigest()
+            st.info(f"SHA-256 Hash: `{file_hash_sb}`")
+
+            if st.button("💾 Store Hash on Blockchain", key="store_hash_sidebar_btn"):
+                with st.spinner("Submitting transaction…"):
+                    tx_hash = store_hash_on_chain(file_hash_sb)
+                    if tx_hash:
+                        st.success(f"🔗 Hash stored! Tx: `{tx_hash}`")
+
+                        # If CombinedClient is initialized, also upload file to resource server
+                        client = st.session_state.get('client')
+                        if client:
+                            with st.spinner("Uploading file to resource server…"):
+                                success = client.upload_file(str(temp_path), version='1')
+                                if success:
+                                    st.success("📤 File uploaded and registered on server!")
+                                    # Remove local temp copy to avoid confusion
+                                    try:
+                                        os.remove(temp_path)
+                                    except Exception:
+                                        pass
+                                else:
+                                    st.warning("⚠️ File upload failed – check console for details.")
     
     # Initialize session state
     if 'step' not in st.session_state:
@@ -144,26 +228,34 @@ def main():
                     resource_server = st.text_input("**Resource Server URL**", value="http://localhost:5002")
 
                 mode = st.radio("**Select Access Mode**", 
-                              ["📊 Telemetry Data", "📥 File Download"],
+                              ["📊 Telemetry Data", "📥 File Download", "📤 File Upload"],
                               index=0,
-                              help="Choose between real-time data access or file downloads")
+                              help="Choose between telemetry, downloading, or uploading files")
                 
-                # Store mode as string "1" or "2"
-                st.session_state.mode = "1" if mode == "📊 Telemetry Data" else "2"
+                # Store mode as string for later reference: 1=Telemetry, 2=File Download, 3=File Upload
+                if mode == "📊 Telemetry Data":
+                    st.session_state.mode = "1"
+                elif mode == "📥 File Download":
+                    st.session_state.mode = "2"
+                else:
+                    st.session_state.mode = "3"
 
                 # Handle scopes based on mode
                 if mode == "📊 Telemetry Data":
                     scopes = st.multiselect(
                         "**Select Scopes**",
-                        ["engine_start", "door_unlock"],
-                        default=["engine_start", "door_unlock"],
+                        ["engine_start", "door_unlock", "file_upload"],
+                        default=["engine_start", "door_unlock", "file_upload"],
                         help="Required permissions for telemetry access"
                     )
-                else:  # File Download mode
+                elif mode == "📥 File Download":
                     st.info("📥 File Download mode selected - using file_download scope")
                     scopes = ["file_download"]
-                    # Display the scope being used
                     st.code("Scope: file_download")
+                else:  # File Upload mode
+                    st.info("📤 File Upload mode selected - using file_upload scope")
+                    scopes = ["file_upload"]
+                    st.code("Scope: file_upload")
 
                 if st.button("🚀 Initialize Authorization", use_container_width=True):
                     with st.spinner("Initializing authorization..."):
@@ -657,6 +749,28 @@ def main():
                 st.write("✅ Token Exchange")
                 st.write("✅ Resource Access")
             
+            # === File Upload & Blockchain Proof ===
+            with st.expander("📤 Upload File & Record Hash on Blockchain", expanded=False):
+                uploaded_file = st.file_uploader("Select a file", key="file_upload")
+                if uploaded_file is not None:
+                    uploads_dir = Path("uploads")
+                    uploads_dir.mkdir(exist_ok=True)
+                    temp_path = uploads_dir / uploaded_file.name
+                    with open(temp_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    st.success(f"✅ File saved temporarily at {temp_path}")
+
+                    # Compute SHA-256
+                    file_bytes = uploaded_file.getvalue()
+                    file_hash = hashlib.sha256(file_bytes).hexdigest()
+                    st.info(f"SHA-256 Hash: `{file_hash}`")
+
+                    if st.button("💾 Store Hash on Blockchain", key="store_hash_btn"):
+                        with st.spinner("Submitting transaction…"):
+                            tx_hash = store_hash_on_chain(file_hash)
+                            if tx_hash:
+                                st.success(f"🔗 Hash stored on chain! Transaction Hash: `{tx_hash}`")
+
             # Add prominent button to start new session
             if st.button("🔄 Start New Session", use_container_width=True, type="primary"):
                 # Clear all session state variables

@@ -138,6 +138,42 @@ class CombinedClient:
             print(f"Error getting data: {str(e)}")
             return None
 
+    def upload_file(self, file_path, version='1'):
+        """Upload a file to the resource server and register its hash on-chain"""
+        try:
+            if not self.token:
+                print("❌ No access token – perform authorization first")
+                return False
+
+            # Endpoint construction
+            filename = os.path.basename(file_path)
+            endpoint = f'/mercedes/upload/{self.client_id}'
+            url = f"{self.resource_server_url}{endpoint}"
+
+            # Prepare headers
+            headers = {
+                'Authorization': f'Bearer {self.token}',
+                'X-Client-Address': self.address
+            }
+
+            with open(file_path, 'rb') as f:
+                files = {'file': (filename, f)}
+                data = {'version': version}
+                print(f"\nUploading file to: {url}")
+                response = requests.post(url, headers=headers, files=files, data=data)
+
+            if response.status_code != 200:
+                print(f"❌ Upload failed: {response.text}")
+                return False
+
+            resp_json = response.json()
+            print("✅ File uploaded successfully!")
+            print(json.dumps(resp_json, indent=2))
+            return True
+        except Exception as e:
+            print(f"Error uploading file: {str(e)}")
+            return False
+
     def download_file(self, filename, version='1', save_path=None):
         """Download and verify file from resource server"""
         try:
